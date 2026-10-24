@@ -29,6 +29,15 @@ public class BasicTeleop extends LinearOpMode {
         DcMotor backRight = hardwareMap.get(DcMotor.class, "rightBack");
         backRight.setDirection(DcMotor.Direction.REVERSE);
 
+        DcMotor intake = hardwareMap.get(DcMotor.class, "intake");
+        intake.setDirection(DcMotor.Direction.FORWARD);
+
+        DcMotor transfer = hardwareMap.get(DcMotor.class, "transfer");
+        transfer.setDirection(DcMotor.Direction.FORWARD);
+
+        DcMotor launch = hardwareMap.get(DcMotor.class, "launch");
+        launch.setDirection(DcMotor.Direction.FORWARD);
+
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -38,12 +47,22 @@ public class BasicTeleop extends LinearOpMode {
         runtime.reset();
 
         double driveLowPower = 0.75;
+        double launchLowPower = 0.6;
+        double transferLowPower = 1.0;
+        double intakeLowPower = 1.0;
+
+        double intakePower;
+        double transferPower;
+        double launchPower;
 
         double frontLeftPower;
         double backLeftPower;
 
         double frontRightPower;
         double backRightPower;
+
+        boolean intaking = false;
+        boolean launching = false;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -78,11 +97,29 @@ public class BasicTeleop extends LinearOpMode {
             backLeftPower = backLeftPower * driveLowPower;
             backRightPower = backRightPower * driveLowPower;
 
+            transferPower = gamepad2.right_trigger * transferLowPower;
+
+            if (gamepad2.leftBumperWasPressed()) intaking = true;
+            else if (gamepad2.startWasPressed()) intaking = false;
+
+            if (gamepad2.rightBumperWasPressed()) launching = true;
+            else if (gamepad2.bWasPressed()) launching = false;
+
+            if (intaking) intakePower = intakeLowPower;
+            else intakePower = 0.0;
+
+            if (launching) launchPower = launchLowPower;
+            else launchPower = 0.0;
+
             // Send calculated power to the motors and servos
             frontLeft.setPower(frontLeftPower);
             frontRight.setPower(frontRightPower);
             backLeft.setPower(backLeftPower);
             backRight.setPower(backRightPower);
+
+            intake.setPower(intakePower);
+            launch.setPower(launchPower);
+            transfer.setPower(transferPower);
 
             /// Telemetry
             // Show the elapsed game time and wheel power.
@@ -92,6 +129,9 @@ public class BasicTeleop extends LinearOpMode {
             telemetry.addLine("MOTORS");
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
+            telemetry.addData("Launch", "%4.2f", launchPower);
+            telemetry.addData("Intake", "%4.2f", intakePower);
+            telemetry.addData("Transfer", "%4.2", transferPower);
 
             telemetry.update();
         }
