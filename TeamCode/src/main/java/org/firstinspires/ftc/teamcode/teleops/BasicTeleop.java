@@ -3,9 +3,13 @@ package org.firstinspires.ftc.teamcode.teleops;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 public class BasicTeleop extends LinearOpMode {
@@ -29,14 +33,21 @@ public class BasicTeleop extends LinearOpMode {
         DcMotor backRight = hardwareMap.get(DcMotor.class, "rightBack");
         backRight.setDirection(DcMotor.Direction.REVERSE);
 
-        DcMotor intake = hardwareMap.get(DcMotor.class, "intake");
-        intake.setDirection(DcMotor.Direction.FORWARD);
+        //DcMotor intake = hardwareMap.get(DcMotor.class, "intake");
+        //intake.setDirection(DcMotor.Direction.REVERSE);
 
-        DcMotor transfer = hardwareMap.get(DcMotor.class, "transfer");
-        transfer.setDirection(DcMotor.Direction.FORWARD);
+        //DcMotor transfer = hardwareMap.get(DcMotor.class, "transfer");
+        //transfer.setDirection(DcMotor.Direction.FORWARD);
 
-        DcMotor launch = hardwareMap.get(DcMotor.class, "launch");
-        launch.setDirection(DcMotor.Direction.FORWARD);
+        //DcMotorEx launch = hardwareMap.get(DcMotorEx.class, "launch");
+        //launch.setDirection(DcMotor.Direction.FORWARD);
+        //launch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //launch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //PIDFCoefficients pidfCoefficients = new PIDFCoefficients(100, 0, 0, 13);
+        //launch.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
+        Servo ramp = hardwareMap.get(Servo.class, "ramp");
+        ramp.setPosition(0.24);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -47,13 +58,12 @@ public class BasicTeleop extends LinearOpMode {
         runtime.reset();
 
         double driveLowPower = 0.75;
-        double launchLowPower = 0.6;
-        double transferLowPower = 1.0;
-        double intakeLowPower = 1.0;
+        //double launchspeed = 720;
+        //double transferLowPower = 0.5;
+        //double intakeLowPower = 0.6;
 
-        double intakePower;
-        double transferPower;
-        double launchPower;
+        //double intakePower;
+        //double transferPower;
 
         double frontLeftPower;
         double backLeftPower;
@@ -61,8 +71,8 @@ public class BasicTeleop extends LinearOpMode {
         double frontRightPower;
         double backRightPower;
 
-        boolean intaking = false;
-        boolean launching = false;
+        //boolean intaking = false;
+        //boolean launching = false;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -71,8 +81,8 @@ public class BasicTeleop extends LinearOpMode {
 
             // Get Movement Input
             double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral = gamepad1.left_stick_x;
-            double yaw = gamepad1.right_stick_x;
+            double lateral = gamepad1.right_stick_x;
+            double yaw = gamepad1.left_stick_x;
 
             // Calculate Wheel Power from Input (I don't know how this was figured out don't change this)
             frontLeftPower = axial + lateral + yaw;
@@ -97,19 +107,22 @@ public class BasicTeleop extends LinearOpMode {
             backLeftPower = backLeftPower * driveLowPower;
             backRightPower = backRightPower * driveLowPower;
 
-            transferPower = gamepad2.right_trigger * transferLowPower;
+            //transferPower = gamepad2.right_trigger * transferLowPower;
 
-            if (gamepad2.leftBumperWasPressed()) intaking = true;
-            else if (gamepad2.startWasPressed()) intaking = false;
+            //if (gamepad2.leftBumperWasPressed()) intaking = true;
+            //else if (gamepad2.startWasPressed()) intaking = false;
 
-            if (gamepad2.rightBumperWasPressed()) launching = true;
-            else if (gamepad2.bWasPressed()) launching = false;
+            //if (gamepad2.rightBumperWasPressed()) launching = true;
+            //else if (gamepad2.bWasPressed()) launching = false;
 
-            if (intaking) intakePower = intakeLowPower;
-            else intakePower = 0.0;
+            //if (intaking) intakePower = intakeLowPower;
+            //else intakePower = 0.0;
 
-            if (launching) launchPower = launchLowPower;
-            else launchPower = 0.0;
+            //if (launching) launch.setVelocity(launchspeed);
+            //else launch.setVelocity(0);
+
+            //if (gamepad2.dpadUpWasPressed()) ramp.setPosition(0.17);
+            //else if (gamepad2.dpadDownWasPressed()) ramp.setPosition(0.28);
 
             // Send calculated power to the motors and servos
             frontLeft.setPower(frontLeftPower);
@@ -117,9 +130,8 @@ public class BasicTeleop extends LinearOpMode {
             backLeft.setPower(backLeftPower);
             backRight.setPower(backRightPower);
 
-            intake.setPower(intakePower);
-            launch.setPower(launchPower);
-            transfer.setPower(transferPower);
+            //intake.setPower(intakePower);
+            //transfer.setPower(transferPower);
 
             /// Telemetry
             // Show the elapsed game time and wheel power.
@@ -129,9 +141,13 @@ public class BasicTeleop extends LinearOpMode {
             telemetry.addLine("MOTORS");
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
-            telemetry.addData("Launch", "%4.2f", launchPower);
-            telemetry.addData("Intake", "%4.2f", intakePower);
-            telemetry.addData("Transfer", "%4.2", transferPower);
+            //telemetry.addData("Launch", "%4.2f", launch.getVelocity());
+            //telemetry.addData("Intake", "%4.2f", intakePower);
+            //telemetry.addData("Transfer", "%4.2f", transferPower);
+
+            //telemetry.addLine();
+            //telemetry.addLine("SERVOS");
+            //telemetry.addData("Ramp", "%4.2f", ramp.getPosition());
 
             telemetry.update();
         }
